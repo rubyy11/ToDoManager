@@ -8,19 +8,25 @@ app.use(bodyParser.json());
 
 app.set("view engine","ejs");
 app.get("/",async(request,response)=>{
+  /*
   const allTodos= await Todo.getTodos();
-  if(request.accepts("html")){
+  
+ */
+const dueToday=await Todo.dueToday(); 
+const dueLater=await Todo.dueLater(); 
+const overdues=await Todo.overdue();
+if(request.accepts("html")){
     response.render('index',{
-      allTodos
+      dueToday,dueLater,overdues
     });
 
   }
   else{
     response.json({
-      allTodos
+      dueToday,dueLater,overdues
     })
   }
-  
+ 
 });
 
 app.use(express.static(path.join(__dirname,'public')));
