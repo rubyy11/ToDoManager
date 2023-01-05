@@ -2,41 +2,44 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
-const path= require("path");
+const path = require("path");
 app.use(bodyParser.json());
+//level 9 changes...
+app.use(express.urlencoded({ extended: false }));
 // set ejs as  view engine
 
-app.set("view engine","ejs");
-app.get("/",async(request,response)=>{
+app.set("view engine", "ejs");
+app.get("/", async (request, response) => {
   /*
   const allTodos= await Todo.getTodos();
   
  */
-const dueToday=await Todo.dueToday(); 
-const dueLater=await Todo.dueLater(); 
-const overdues=await Todo.overdue();
-if(request.accepts("html")){
-    response.render('index',{
-      dueToday,dueLater,overdues
+  const dueToday = await Todo.dueToday();
+  const dueLater = await Todo.dueLater();
+  const overdues = await Todo.overdue();
+  if (request.accepts("html")) {
+    response.render("index", {
+      dueToday,
+      dueLater,
+      overdues,
     });
-
-  }
-  else{
+  } else {
     response.json({
-      dueToday,dueLater,overdues
-    })
+      dueToday,
+      dueLater,
+      overdues,
+    });
   }
- 
 });
 
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname, "public")));
 app.get("/", function (request, response) {
   response.send("Hello World");
 });
 
 app.get("/todos", async function (_request, response) {
   console.log("Processing list of all Todos ...");
-  const allTodo=await Todo.findAll()
+  const allTodo = await Todo.findAll();
   return response.json(allTodo);
   // response.send(todos)
 });
@@ -53,8 +56,8 @@ app.get("/todos/:id", async function (request, response) {
 
 app.post("/todos", async function (request, response) {
   try {
-    const todo = await Todo.addTodo(request.body);
-    return response.json(todo);
+    await Todo.addTodo(request.body);
+    return response.redirect("/");
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -74,13 +77,12 @@ app.put("/todos/:id/markAsCompleted", async function (request, response) {
 
 app.delete("/todos/:id", async function (request, response) {
   console.log("We have to delete a Todo with ID: ", request.params.id);
-  const todo=await Todo.findByPk(request.params.id);
-  
-  try{
-    deleteTodo= await todo.deleted();
-    return response.json(true)
-  }
-  catch(error){
+  const todo = await Todo.findByPk(request.params.id);
+
+  try {
+    await todo.deleted();
+    return response.json(true);
+  } catch (error) {
     console.log(error);
     return response.json(false);
   }
