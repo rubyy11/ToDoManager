@@ -2,5 +2,8 @@ body {
   color: rgb(25, 24, 24);
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
-  background-color: rgb(163, 247, 247);
+  background-color: rgb(252, 248, 248);
+}
+.Todo-item:hover .trash-icon {
+  display: block;
 }

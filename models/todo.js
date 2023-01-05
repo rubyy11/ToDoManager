@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
+    static associate() {
       // define association here
     }
 
@@ -18,7 +18,13 @@ module.exports = (sequelize, DataTypes) => {
     static getTodos() {
       return this.findAll();
     }
-
+    static async remove(id) {
+      return this.destroy({
+        where: {
+          id,
+        },
+      });
+    }
     //changessss...........
 
     static async overdue() {
@@ -27,9 +33,25 @@ module.exports = (sequelize, DataTypes) => {
         const l1 = await Todo.findAll({
           where: {
             dueDate: { [Op.lt]: new Date() },
+            completed: false,
           },
         });
         return l1;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    static async completedtodos() {
+      // FILL IN HERE TO RETURN OVERDUE ITEMS
+      // retrieve items from table
+      // return list of items where due date is less than todays date
+      try {
+        const completedTodos = await Todo.findAll({
+          where: {
+            completed: true,
+          },
+        });
+        return completedTodos;
       } catch (error) {
         console.log(error);
       }
@@ -41,6 +63,7 @@ module.exports = (sequelize, DataTypes) => {
         const l2 = await Todo.findAll({
           where: {
             dueDate: { [Op.eq]: new Date() },
+            completed: false,
           },
         });
         return l2;
@@ -55,6 +78,7 @@ module.exports = (sequelize, DataTypes) => {
         const l3 = await Todo.findAll({
           where: {
             dueDate: { [Op.gt]: new Date() },
+            completed: false,
           },
         });
         return l3;
@@ -62,12 +86,14 @@ module.exports = (sequelize, DataTypes) => {
         console.log(error);
       }
     }
+    setCompletionStatus(l4) {
+      return this.update({
+        completed: l4,
+      });
+    }
 
     //changes endss...........
 
-    markAsCompleted() {
-      return this.update({ completed: true });
-    }
     deleted() {
       this.destroy();
       return true;
