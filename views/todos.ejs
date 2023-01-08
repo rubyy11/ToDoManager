@@ -13,23 +13,6 @@
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
         
-        //delete functionnn...............
-
-        function deleteTodo(id){
-            fetch(`/todos/${id}`,{
-                method: "delete",
-                headers: {"Content-Type": "application/json"},
-                body : JSON.stringify({
-                    "_csrf":token
-                })
-            })
-            .then((res)=>{
-                if (res.ok){
-                    window.location.reload();
-                }
-            })
-            .catch((err)=> console.error(err));
-        }
         //updating todo............
         function updateTodo(id){
             let completed = document.getElementById(id).checked
@@ -46,6 +29,23 @@
             })
             .catch((err)=> console.error(err));
         }
+          //delete functionnn...............
+
+          function deleteTodo(id){
+            fetch(`/todos/${id}`,{
+                method: "delete",
+                headers: {"Content-Type": "application/json"},
+                body : JSON.stringify({
+                    "_csrf":token
+                })
+            })
+            .then((res)=>{
+                if (res.ok){
+                    window.location.reload();
+                }
+            })
+            .catch((err)=> console.error(err));
+        }
     </script>
 </head>
 <body>
@@ -54,9 +54,7 @@
             <%- include('header.ejs') %> 
             <br>
             <a href="/signout">SignOut</a>
-           
-            <br>
-            <b><%= firstname ,lastname %> 
+            <b><%= firstname %> 
             </b>
             <b><%= lastname %> 
             </b>

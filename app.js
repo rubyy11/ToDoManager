@@ -14,7 +14,6 @@ const saltRounds = 10;
 const flash = require("connect-flash");
 app.set("views", path.join(__dirname, "views"));
 app.use(flash());
-
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser("shh! some secret string"));
@@ -94,10 +93,11 @@ app.get(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     const loggedInUser = request.user.id;
-    const allTodos = await Todo.getTodos(loggedInUser);
-    const overdues = await Todo.overdue(loggedInUser);
+    console.log(loggedInUser);
     const duetoday = await Todo.dueToday(loggedInUser);
     const duelater = await Todo.dueLater(loggedInUser);
+    const allTodos = await Todo.getTodos(loggedInUser);
+    const overdues = await Todo.overdue(loggedInUser);
     const completedTodo = await Todo.completedtodos(loggedInUser);
     if (request.accepts("html")) {
       response.render("todos", {
@@ -116,17 +116,7 @@ app.get(
   }
 );
 
-app.get("/signup", (request, response) => {
-  if (request.user != undefined) {
-    response.redirect("/todos");
-  } else {
-    console.log(request.body.user);
-    response.render("signup", {
-      title: "Signup",
-      csrfToken: request.csrfToken(),
-    });
-  }
-});
+//...login page rendering..
 
 app.get("/login", (request, response) => {
   if (request.user != undefined) {
@@ -140,6 +130,21 @@ app.get("/login", (request, response) => {
   }
 });
 
+//...Sign Up page rendering..
+app.get("/signup", (request, response) => {
+  if (request.user != undefined) {
+    response.redirect("/todos");
+  } else {
+    console.log(request.body.user);
+    response.render("signup", {
+      title: "Signup",
+      csrfToken: request.csrfToken(),
+    });
+  }
+});
+
+//...Sign out page rendering..
+
 app.get("/signout", (request, response, next) => {
   request.logout((err) => {
     if (err) {
@@ -151,25 +156,9 @@ app.get("/signout", (request, response, next) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/todos", async function (_request, response) {
-  console.log("Processing list of all Todos ...");
-  const todo = await Todo.findAll();
-  return response.json(todo);
-});
-
-app.get("/todos/:id", async function (request, response) {
-  try {
-    const todo = await Todo.findByPk(request.params.id);
-    return response.json(todo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
 app.post("/users", async (request, response) => {
   const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
-  console.log("password is", hashedPwd);
+  console.log("PASSWORD IS", hashedPwd);
   try {
     const user = await User.create({
       firstName: request.body.firstName,
@@ -192,6 +181,28 @@ app.post("/users", async (request, response) => {
   }
 });
 
+//...getting all todos..
+
+app.get("/todos", async function (_request, response) {
+  console.log("Processing list of all Todos ...");
+  const todo = await Todo.findAll();
+  return response.json(todo);
+});
+
+//...getting todos by id..
+
+app.get("/todos/:id", async function (request, response) {
+  try {
+    const todo = await Todo.findByPk(request.params.id);
+    return response.json(todo);
+  } catch (error) {
+    console.log(error);
+    return response.status(422).json(error);
+  }
+});
+
+//.....creating session...
+
 app.post(
   "/session",
   passport.authenticate("local", {
@@ -203,6 +214,7 @@ app.post(
     response.redirect("/todos");
   }
 );
+//...ensured login user updatdation
 
 app.post(
   "/todos",
@@ -231,6 +243,22 @@ app.post(
   }
 );
 
+//...deleting todoss...
+
+app.delete(
+  "/todos/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async function (request, response) {
+    console.log("We have to delete a Todo with ID: ", request.params.id);
+    try {
+      await Todo.remove(request.params.id, request.user.id);
+      return response.json({ success: true });
+    } catch (error) {
+      return response.status(422).json(error);
+    }
+  }
+);
+
 app.put(
   "/todos/:id",
   connectEnsureLogin.ensureLoggedIn(),
@@ -245,20 +273,6 @@ app.put(
     } catch (error) {
       console.log(error);
 
-      return response.status(422).json(error);
-    }
-  }
-);
-
-app.delete(
-  "/todos/:id",
-  connectEnsureLogin.ensureLoggedIn(),
-  async function (request, response) {
-    console.log("We have to delete a Todo with ID: ", request.params.id);
-    try {
-      await Todo.remove(request.params.id, request.user.id);
-      return response.json({ success: true });
-    } catch (error) {
       return response.status(422).json(error);
     }
   }
