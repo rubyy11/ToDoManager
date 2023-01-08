@@ -222,7 +222,7 @@ app.post(
           request.flash("error", error.errors[i].message);
         }
       }
-      if (error.parameters && error.parameters[1] === "Not A valid Date") {
+      if (error.parameters && error.parameters[1] === "Invalid date") {
         request.flash("error", error.parameters[1]);
       }
 

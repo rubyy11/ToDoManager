@@ -128,13 +128,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: true,
-          len: 5,
+          len: {
+            args: 5,
+            msg: "oops!! length is less than 5",
+          },
         },
       },
-      dueDate: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-      },
+
+      dueDate: DataTypes.DATEONLY,
       completed: DataTypes.BOOLEAN,
     },
     {
